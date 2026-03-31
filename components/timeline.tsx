@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Check, Circle, Clock, Zap } from 'lucide-react'
+import { Check, Circle, Zap, Edit3, Plus } from 'lucide-react'
 import { ProgressBar } from './progress-ring'
 
 interface TimelineItemProps {
@@ -40,9 +40,9 @@ export function TimelineItem({
       <div 
         className={cn(
           'relative z-10 flex items-center justify-center w-10 h-10 rounded-full border-2 shrink-0 transition-all duration-300',
-          isCompleted && 'bg-accent border-accent text-accent-foreground',
-          isActive && !isCompleted && 'bg-primary border-primary text-primary-foreground glow-primary',
-          !isActive && !isCompleted && 'bg-secondary border-border text-muted-foreground'
+          isCompleted && 'bg-foreground border-foreground text-background',
+          isActive && !isCompleted && 'bg-foreground border-foreground text-background glow-white',
+          !isActive && !isCompleted && 'bg-card border-border text-muted-foreground'
         )}
       >
         {icon ? icon : isCompleted ? (
@@ -99,9 +99,17 @@ interface MilestoneTimelineProps {
   }[]
   currentWeek: number
   getWeekProgress: (weekNumber: number) => number
+  onEditMilestone?: (milestone: { id: string; week: number; title: string; description: string }) => void
+  onAddMilestone?: () => void
 }
 
-export function MilestoneTimeline({ milestones, currentWeek, getWeekProgress }: MilestoneTimelineProps) {
+export function MilestoneTimeline({ 
+  milestones, 
+  currentWeek, 
+  getWeekProgress,
+  onEditMilestone,
+  onAddMilestone
+}: MilestoneTimelineProps) {
   return (
     <div className="relative">
       {/* Background line */}
@@ -109,33 +117,33 @@ export function MilestoneTimeline({ milestones, currentWeek, getWeekProgress }: 
       
       {/* Progress line */}
       <div 
-        className="absolute left-0 top-4 h-1 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500"
+        className="absolute left-0 top-4 h-1 bg-foreground rounded-full transition-all duration-500"
         style={{ width: `${Math.min((currentWeek / 12) * 100, 100)}%` }}
       />
 
       {/* Milestones */}
       <div className="relative flex justify-between">
-        {milestones.map((milestone, index) => {
+        {milestones.map((milestone) => {
           const isPast = currentWeek > milestone.week
           const isCurrent = currentWeek === milestone.week
-          const progress = getWeekProgress(milestone.week)
           
           return (
             <div 
               key={milestone.id}
-              className="flex flex-col items-center"
+              className="group flex flex-col items-center"
               style={{ 
                 position: 'absolute', 
                 left: `${(milestone.week / 12) * 100}%`,
                 transform: 'translateX(-50%)'
               }}
             >
-              <div 
+              <button
+                onClick={() => onEditMilestone?.(milestone)}
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all duration-300',
-                  isPast && 'bg-accent border-accent text-accent-foreground',
-                  isCurrent && 'bg-primary border-primary text-primary-foreground glow-primary animate-pulse',
-                  !isPast && !isCurrent && 'bg-card border-border text-muted-foreground'
+                  isPast && 'bg-foreground border-foreground text-background',
+                  isCurrent && 'bg-foreground border-foreground text-background glow-white animate-pulse-subtle',
+                  !isPast && !isCurrent && 'bg-card border-border text-muted-foreground hover:border-foreground/50'
                 )}
               >
                 {isPast ? (
@@ -143,7 +151,7 @@ export function MilestoneTimeline({ milestones, currentWeek, getWeekProgress }: 
                 ) : (
                   <span className="text-xs font-bold">{milestone.week}</span>
                 )}
-              </div>
+              </button>
               <div className="mt-3 text-center max-w-[100px]">
                 <p className={cn(
                   'text-xs font-medium',
@@ -154,11 +162,33 @@ export function MilestoneTimeline({ milestones, currentWeek, getWeekProgress }: 
                 <p className="text-[10px] text-muted-foreground mt-0.5 hidden md:block">
                   {milestone.description}
                 </p>
+                {onEditMilestone && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onEditMilestone(milestone)
+                    }}
+                    className="mt-1 opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-secondary transition-all"
+                  >
+                    <Edit3 className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                )}
               </div>
             </div>
           )
         })}
       </div>
+      
+      {/* Add milestone button */}
+      {onAddMilestone && (
+        <button
+          onClick={onAddMilestone}
+          className="absolute right-0 top-1 p-1 rounded-full hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground"
+          title="添加里程碑"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      )}
     </div>
   )
 }

@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
-import { mindMapData, type MindMapNode } from '@/lib/learning-data'
-import { ChevronRight, ChevronDown, Circle, Zap } from 'lucide-react'
+import { type MindMapNode } from '@/lib/learning-data'
+import { ChevronRight, ChevronDown, Circle, Zap, BookOpen } from 'lucide-react'
 
 interface MindMapNodeProps {
   node: MindMapNode
@@ -25,36 +25,37 @@ function MindMapNodeItem({
   const hasChildren = node.children && node.children.length > 0
   const isRoot = level === 0
 
-  const colors = [
-    'from-primary to-primary/80',
-    'from-blue-500 to-blue-400',
-    'from-emerald-500 to-emerald-400',
-    'from-amber-500 to-amber-400',
-    'from-pink-500 to-pink-400',
-    'from-purple-500 to-purple-400',
-  ]
-
   return (
     <div className="relative">
       <button
         onClick={onToggle}
         className={cn(
-          'flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200',
-          'hover:scale-[1.02]',
+          'flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 text-left w-full',
+          'hover:scale-[1.01]',
           isRoot 
-            ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground font-bold text-lg px-6 py-3' 
+            ? 'bg-foreground text-background font-bold text-lg px-6 py-3' 
             : level === 1
-              ? cn('bg-gradient-to-r text-white font-semibold', colors[parseInt(node.id.slice(-1)) % colors.length] || colors[0])
-              : 'bg-secondary/80 text-foreground hover:bg-secondary'
+              ? 'bg-secondary text-foreground font-semibold border border-border hover:border-foreground/30'
+              : 'bg-card text-foreground hover:bg-secondary border border-transparent hover:border-border'
         )}
       >
         {hasChildren && (
           isExpanded 
-            ? <ChevronDown className={cn('w-4 h-4', isRoot && 'w-5 h-5')} />
-            : <ChevronRight className={cn('w-4 h-4', isRoot && 'w-5 h-5')} />
+            ? <ChevronDown className={cn('w-4 h-4 shrink-0', isRoot && 'w-5 h-5')} />
+            : <ChevronRight className={cn('w-4 h-4 shrink-0', isRoot && 'w-5 h-5')} />
         )}
-        {!hasChildren && <Circle className="w-2 h-2 fill-current" />}
-        <span>{node.label}</span>
+        {!hasChildren && <Circle className="w-2 h-2 fill-current shrink-0" />}
+        <div className="flex-1 min-w-0">
+          <span className="block truncate">{node.label}</span>
+          {node.description && (
+            <span className={cn(
+              'block text-xs mt-0.5',
+              isRoot ? 'text-background/70' : 'text-muted-foreground'
+            )}>
+              {node.description}
+            </span>
+          )}
+        </div>
       </button>
 
       {hasChildren && isExpanded && (
@@ -62,7 +63,7 @@ function MindMapNodeItem({
           'ml-6 mt-2 space-y-2 relative',
           level > 0 && 'before:absolute before:left-0 before:top-0 before:bottom-0 before:w-px before:bg-border'
         )}>
-          {node.children!.map((child, index) => {
+          {node.children!.map((child) => {
             const childExpanded = expandedNodes.has(child.id)
             return (
               <div key={child.id} className="relative pl-4">
@@ -85,7 +86,11 @@ function MindMapNodeItem({
   )
 }
 
-export function MindMap() {
+interface MindMapProps {
+  data: MindMapNode
+}
+
+export function MindMap({ data }: MindMapProps) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set(['root']))
 
   const toggleNode = (id: string) => {
@@ -106,7 +111,7 @@ export function MindMap() {
       allIds.add(node.id)
       node.children?.forEach(traverse)
     }
-    traverse(mindMapData)
+    traverse(data)
     setExpandedNodes(allIds)
   }
 
@@ -118,19 +123,19 @@ export function MindMap() {
     <div className="p-6 bg-card rounded-xl border border-border">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <Zap className="w-5 h-5 text-primary" />
+          <Zap className="w-5 h-5 text-foreground" />
           <h3 className="font-semibold text-foreground">知识体系</h3>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={expandAll}
-            className="text-xs px-3 py-1 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           >
             展开全部
           </button>
           <button 
             onClick={collapseAll}
-            className="text-xs px-3 py-1 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs px-3 py-1.5 rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors"
           >
             收起全部
           </button>
@@ -139,13 +144,44 @@ export function MindMap() {
 
       <div className="space-y-3">
         <MindMapNodeItem
-          node={mindMapData}
+          node={data}
           level={0}
-          isExpanded={expandedNodes.has(mindMapData.id)}
-          onToggle={() => toggleNode(mindMapData.id)}
+          isExpanded={expandedNodes.has(data.id)}
+          onToggle={() => toggleNode(data.id)}
           expandedNodes={expandedNodes}
           onToggleNode={toggleNode}
         />
+      </div>
+    </div>
+  )
+}
+
+// Learning Resources Section
+interface LearningResourcesProps {
+  resources: { category: string; items: string[] }[]
+}
+
+export function LearningResources({ resources }: LearningResourcesProps) {
+  return (
+    <div className="mt-6 p-6 bg-card rounded-xl border border-border">
+      <div className="flex items-center gap-2 mb-4">
+        <BookOpen className="w-5 h-5 text-foreground" />
+        <h3 className="font-semibold text-foreground">学习资源推荐</h3>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {resources.map((category) => (
+          <div key={category.category} className="p-4 rounded-lg bg-secondary/50 border border-border">
+            <h4 className="font-medium text-foreground mb-2">{category.category}</h4>
+            <ul className="space-y-1.5">
+              {category.items.map((item, i) => (
+                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                  <Circle className="w-1.5 h-1.5 mt-2 fill-current shrink-0" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
     </div>
   )

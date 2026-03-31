@@ -17,9 +17,11 @@ export function ProgressRing({
   className,
   showLabel = true 
 }: ProgressRingProps) {
+  // Ensure progress is a valid number between 0 and 100
+  const safeProgress = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
   const radius = (size - strokeWidth) / 2
   const circumference = radius * 2 * Math.PI
-  const offset = circumference - (progress / 100) * circumference
+  const offset = circumference - (safeProgress / 100) * circumference
 
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
@@ -40,23 +42,17 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="url(#progressGradient)"
+          stroke="currentColor"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className="transition-all duration-500 ease-out"
+          className="text-foreground transition-all duration-500 ease-out"
         />
-        <defs>
-          <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="oklch(0.65 0.24 265)" />
-            <stop offset="100%" stopColor="oklch(0.7 0.18 180)" />
-          </linearGradient>
-        </defs>
       </svg>
       {showLabel && (
         <span className="absolute text-sm font-semibold text-foreground">
-          {progress}%
+          {safeProgress}%
         </span>
       )}
     </div>
@@ -76,6 +72,8 @@ export function ProgressBar({
   showLabel = false,
   size = 'md'
 }: ProgressBarProps) {
+  // Ensure progress is a valid number between 0 and 100
+  const safeProgress = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
   const heights = {
     sm: 'h-1.5',
     md: 'h-2.5',
@@ -86,15 +84,56 @@ export function ProgressBar({
     <div className={cn('w-full', className)}>
       <div className={cn('w-full bg-secondary rounded-full overflow-hidden', heights[size])}>
         <div 
-          className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
-          style={{ width: `${progress}%` }}
+          className="h-full rounded-full bg-foreground transition-all duration-500 ease-out"
+          style={{ width: `${safeProgress}%` }}
         />
       </div>
       {showLabel && (
         <span className="text-xs text-muted-foreground mt-1 block text-right">
-          {progress}%
+          {safeProgress}%
         </span>
       )}
     </div>
+  )
+}
+
+interface CircularProgressProps {
+  progress: number
+  size?: number
+  className?: string
+}
+
+export function CircularProgress({ progress, size = 24, className }: CircularProgressProps) {
+  // Ensure progress is a valid number between 0 and 100
+  const safeProgress = Number.isFinite(progress) ? Math.min(100, Math.max(0, progress)) : 0
+  const strokeWidth = 3
+  const radius = (size - strokeWidth) / 2
+  const circumference = radius * 2 * Math.PI
+  const offset = circumference - (safeProgress / 100) * circumference
+
+  return (
+    <svg className={cn('transform -rotate-90', className)} width={size} height={size}>
+      <circle
+        className="text-secondary"
+        strokeWidth={strokeWidth}
+        stroke="currentColor"
+        fill="transparent"
+        r={radius}
+        cx={size / 2}
+        cy={size / 2}
+      />
+      <circle
+        className="text-foreground"
+        strokeWidth={strokeWidth}
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        stroke="currentColor"
+        fill="transparent"
+        r={radius}
+        cx={size / 2}
+        cy={size / 2}
+      />
+    </svg>
   )
 }
