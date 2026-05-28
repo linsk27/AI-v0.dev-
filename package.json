@@ -1,7 +1,20 @@
 {
-  "name": "my-project",
+  "name": "ai-v0-dev-prototype",
   "version": "0.1.0",
   "private": true,
+  "description": "Next.js and TypeScript prototype for AI learning dashboards, v0.dev UI experiments, project cards, and progress tracking.",
+  "keywords": [
+    "ai-ui",
+    "ai-dashboard",
+    "v0",
+    "v0-dev",
+    "nextjs",
+    "typescript",
+    "tailwind",
+    "shadcn-ui",
+    "learning-dashboard",
+    "product-prototype"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
