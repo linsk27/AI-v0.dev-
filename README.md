@@ -6,7 +6,7 @@ AI-v0.dev- 是一个用 v0、Next.js、React、TypeScript 和 Tailwind CSS 搭�
 
 English summary: AI-v0.dev- is a Next.js and TypeScript prototype for AI learning dashboards, v0.dev UI experiments, product interface design, progress tracking, project cards, and local-first learning plan management.
 
-项目展示页：[linsk27 projects - AI-v0.dev-](https://linsk27-github-io.vercel.app/projects/#ai-v0dev-)
+项目展示页：[linsk27 projects - AI-v0.dev-](https://linsk27.github.io/projects/ai-v0-dev/)
 
 如果你关注 AI UI prototype、v0.dev workflow、Next.js dashboard、Tailwind interface design 或学习计划产品原型，欢迎 Star；我会继续把可复用的界面结构和交互沉淀出来。
 
